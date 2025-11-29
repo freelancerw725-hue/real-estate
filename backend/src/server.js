@@ -10,8 +10,20 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-app.use(cors());
+// Middleware - FIXED CORS
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://real-estate-ten-ruby-83.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Allow OPTIONS preflight
+app.options('*', cors());
+
+// Body parser
 app.use(express.json());
 
 // Root route
