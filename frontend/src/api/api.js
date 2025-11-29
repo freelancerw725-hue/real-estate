@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+// 🔥 LIVE BACKEND BASE URL (Render)
+const API_BASE_URL = 'https://real-estate-q6r2.onrender.com/api';
 
 export const api = {
   // Properties
@@ -187,7 +188,7 @@ export const api = {
     return response.json();
   },
 
-  // Stats/Dashboard data
+  // Dashboard Stats
   getDashboardStats: async () => {
     const token = localStorage.getItem('adminToken');
     const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
