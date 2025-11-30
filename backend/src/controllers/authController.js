@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../../models/User');   // ✅ FIXED PATH
 const jwt = require('jsonwebtoken');
 
 // Generate JWT token
@@ -13,6 +13,7 @@ const register = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
 
+    // Check if user already exists
     const existingUser = await User.findOne({
       $or: [{ email }, { username }]
     });
@@ -23,25 +24,35 @@ const register = async (req, res) => {
       });
     }
 
+    // Create new user
     const user = new User({
       username,
       email,
       password,
-      role: role || 'admin'   // default admin
+      role: role || 'admin' // default admin
     });
 
     await user.save();
 
+    // Generate token
     const token = generateToken(user._id);
 
     res.status(201).json({
       message: 'User registered successfully',
-      user,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      },
       token
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: 'Server error',
+      error: error.message
+    });
   }
 };
 
@@ -50,29 +61,55 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Find user by email
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
-    const isValid = await user.comparePassword(password);
-    if (!isValid) return res.status(401).json({ message: 'Invalid credentials' });
+    // Check password
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
+    // Generate token
     const token = generateToken(user._id);
 
     res.json({
       message: 'Login successful',
-      user,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      },
       token
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: 'Server error',
+      error: error.message
+    });
   }
 };
 
-// Get profile
+// Get profile (protected)
 const getProfile = async (req, res) => {
-  const user = await User.findById(req.user.userId).select('-password');
-  res.json({ user });
+  try {
+    const user = await User.findById(req.user.userId).select('-password');
+    res.json({ user });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Server error',
+      error: error.message
+    });
+  }
 };
 
-module.exports = { register, login, getProfile };
+module.exports = {
+  register,
+  login,
+  getProfile
+};
