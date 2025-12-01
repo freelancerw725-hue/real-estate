@@ -12,10 +12,7 @@ connectDB();
 
 // Middleware - FIXED CORS
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://real-estate-ten-ruby-83.vercel.app"
-  ],
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));

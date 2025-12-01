@@ -1,4 +1,4 @@
-// 🔥 LIVE BACKEND BASE URL (Render)
+// 🔥 LOCAL BACKEND BASE URL (for development)
 const API_BASE_URL = 'https://real-estate-q6r2.onrender.com/api';
 
 export const api = {
