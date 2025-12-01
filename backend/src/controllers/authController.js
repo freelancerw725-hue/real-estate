@@ -1,5 +1,5 @@
-const User = require('../models/User');   // ✅ FIXED PATH
-const Admin = require('../models/Admin');   // ✅ FIXED PATH
+const User = require('../../models/User');   // ✅ FIXED PATH
+const Admin = require('../../models/Admin');   // ✅ FIXED PATH
 const jwt = require('jsonwebtoken');
 
 // Generate JWT token
