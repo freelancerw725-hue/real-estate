@@ -13,8 +13,9 @@ connectDB();
 // Middleware - FIXED CORS
 app.use(cors({
   origin: ["https://real-estate.vercel.app", "http://localhost:3000"],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }));
 
 // Allow OPTIONS preflight
