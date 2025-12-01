@@ -10,6 +10,9 @@ router.post('/register', register);
 // Login user
 router.post('/login', login);
 
+// Admin login (alias for login)
+router.post('/admin/login', login);
+
 // Get user profile (protected)
 router.get('/profile', authenticateToken, getProfile);
 

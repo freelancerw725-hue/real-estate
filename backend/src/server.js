@@ -12,7 +12,7 @@ connectDB();
 
 // Middleware - FIXED CORS
 app.use(cors({
-  origin: "*",
+  origin: ["https://real-estate.vercel.app", "http://localhost:3000"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
@@ -41,6 +41,10 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/contacts', contactRoutes);
+
+// Admin login route (direct access)
+const { login } = require('./controllers/authController');
+app.post('/api/admin/login', login);
 
 // Health check
 app.get('/api/health', (req, res) => {

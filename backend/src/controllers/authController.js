@@ -1,4 +1,5 @@
 const User = require('../../models/User');   // ✅ FIXED PATH
+const Admin = require('../models/Admin');   // ✅ FIXED PATH
 const jwt = require('jsonwebtoken');
 
 // Generate JWT token
@@ -56,33 +57,50 @@ const register = async (req, res) => {
   }
 };
 
-// Login user
+// Login user or admin
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email
-    const user = await User.findOne({ email });
-    if (!user) {
+    // First try to find user in Admin model
+    let account = await Admin.findOne({ email });
+    let isAdmin = true;
+
+    if (!account) {
+      // If not found in Admin, try User model
+      account = await User.findOne({ email });
+      isAdmin = false;
+    }
+
+    if (!account) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Check password
-    const isPasswordValid = await user.comparePassword(password);
+    let isPasswordValid;
+    if (isAdmin) {
+      // For Admin model, use bcrypt directly since it doesn't have comparePassword method
+      const bcrypt = require('bcryptjs');
+      isPasswordValid = await bcrypt.compare(password, account.password);
+    } else {
+      // For User model, use the comparePassword method
+      isPasswordValid = await account.comparePassword(password);
+    }
+
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Generate token
-    const token = generateToken(user._id);
+    const token = generateToken(account._id);
 
     res.json({
       message: 'Login successful',
       user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role
+        id: account._id,
+        email: account.email,
+        role: isAdmin ? 'admin' : account.role,
+        type: isAdmin ? 'admin' : 'user'
       },
       token
     });

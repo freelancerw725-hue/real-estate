@@ -188,6 +188,18 @@ export const api = {
     return response.json();
   },
 
+  // Admin login
+  login: async (credentials) => {
+    const response = await fetch(`${API_BASE_URL}/admin/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+    return response.json();
+  },
+
   // Dashboard Stats
   getDashboardStats: async () => {
     const token = localStorage.getItem('adminToken');
