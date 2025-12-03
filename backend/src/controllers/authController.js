@@ -1,6 +1,8 @@
 const User = require('../../models/User');   // ✅ FIXED PATH
 const Admin = require('../../models/Admin');   // ✅ FIXED PATH
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 // Generate JWT token
 const generateToken = (userId) => {

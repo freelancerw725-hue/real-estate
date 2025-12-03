@@ -22,7 +22,8 @@ export default function AdminDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [otpStep, setOtpStep] = useState('email'); // 'email' or 'otp'
+  const [loginData, setLoginData] = useState({ email: '', otp: '' });
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -336,25 +337,51 @@ export default function AdminDashboard() {
     });
   };
 
-  const handleLogin = async (e) => {
+  const handleSendOTP = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const data = await api.login(loginData);
+      const data = await api.sendOTP({ email: loginData.email });
+
+      if (data.message === 'OTP sent successfully') {
+        setOtpStep('otp');
+        alert('OTP sent to your email');
+      } else {
+        alert(data.message || 'Failed to send OTP');
+      }
+    } catch (error) {
+      console.error('Send OTP error:', error);
+      alert('Failed to send OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      const data = await api.verifyOTP({ email: loginData.email, otp: loginData.otp });
 
       if (data.token) {
         localStorage.setItem('adminToken', data.token);
         setIsLoggedIn(true);
-        setLoginData({ email: '', password: '' });
+        setLoginData({ email: '', otp: '' });
+        setOtpStep('email');
       } else {
-        alert(data.message || 'Login failed');
+        alert(data.message || 'OTP verification failed');
       }
     } catch (error) {
-      console.error('Login error:', error);
-      alert('Login failed. Please try again.');
+      console.error('Verify OTP error:', error);
+      alert('OTP verification failed. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBackToEmail = () => {
+    setOtpStep('email');
+    setLoginData({ ...loginData, otp: '' });
   };
 
   const handleLogout = () => {
@@ -442,35 +469,55 @@ export default function AdminDashboard() {
         <Card className="w-full max-w-md rounded-2xl shadow-md border border-gray-200">
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold text-center mb-6">Admin Login</h2>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
-                <input
-                  type="email"
-                  value={loginData.email}
-                  onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-                  className="w-full p-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Password</label>
-                <input
-                  type="password"
-                  value={loginData.password}
-                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                  className="w-full p-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading ? 'Logging in...' : 'Login'}
-              </button>
-            </form>
+            {otpStep === 'email' ? (
+              <form onSubmit={handleSendOTP} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={loginData.email}
+                    onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                    className="w-full p-2 border rounded-lg"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {loading ? 'Sending OTP...' : 'Send OTP'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOTP} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">OTP</label>
+                  <input
+                    type="text"
+                    value={loginData.otp}
+                    onChange={(e) => setLoginData({...loginData, otp: e.target.value})}
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="Enter 6-digit OTP"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {loading ? 'Verifying...' : 'Verify OTP'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBackToEmail}
+                  className="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600"
+                >
+                  Back to Email
+                </button>
+              </form>
+            )}
           </CardContent>
         </Card>
       </div>

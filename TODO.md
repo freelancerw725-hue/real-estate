@@ -1,5 +1,17 @@
-# TODO: Implement Property Details Page
+# OTP-Based Admin Login Implementation
 
-- [x] Create PropertyDetails.jsx component that fetches and displays property details and agent list
-- [x] Add new route /property/:id in App.jsx to render PropertyDetails component
-- [x] Update Properties.jsx to add onClick handler to "View Details" button for navigation
+## Backend Changes
+- [ ] Install nodemailer dependency
+- [ ] Update Admin model to include OTP fields (otp, otpExpires)
+- [ ] Create sendOTP function in authController
+- [ ] Create verifyOTP function in authController
+- [ ] Update auth routes to include /admin/send-otp and /admin/verify-otp
+
+## Frontend Changes
+- [ ] Update AdminDashboard component to use OTP flow
+- [ ] Update api.js with sendOTP and verifyOTP functions
+
+## Testing
+- [ ] Test complete OTP flow
+- [ ] Verify httpOnly cookie is set
+- [ ] Ensure dashboard opens after successful verification
