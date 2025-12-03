@@ -24,6 +24,15 @@ app.options('*', cors());
 // Body parser
 app.use(express.json());
 
+// Admin login route (direct access) - MOVED BEFORE OTHER ROUTES
+const { login } = require('./controllers/authController');
+app.post('/api/admin/login', cors({
+  origin: ["https://real-estate.vercel.app", "http://localhost:3000"],
+  methods: ["POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}), login);
+
 // Root route
 app.get('/', (req, res) => {
   res.json({ message: 'Real Estate API is running!' });
@@ -42,10 +51,6 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/contacts', contactRoutes);
-
-// Admin login route (direct access)
-const { login } = require('./controllers/authController');
-app.post('/api/admin/login', login);
 
 // Health check
 app.get('/api/health', (req, res) => {
