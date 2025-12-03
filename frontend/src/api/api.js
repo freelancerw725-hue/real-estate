@@ -201,6 +201,31 @@ export const api = {
     return response.json();
   },
 
+  // Send OTP for admin login
+  sendOTP: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/auth/admin/send-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  // Verify OTP for admin login
+  verifyOTP: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/auth/admin/verify-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
   // Dashboard Stats
   getDashboardStats: async () => {
     const token = localStorage.getItem('adminToken');

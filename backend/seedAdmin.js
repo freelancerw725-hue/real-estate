@@ -8,11 +8,11 @@ const createAdminUser = async () => {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/real-estate');
 
     // Check if admin already exists
-    const existingAdmin = await User.findOne({ email: 'admin@realestate.com' });
+    const existingAdmin = await User.findOne({ email: 'shop43856@gmail.com' });
 
     if (existingAdmin) {
       console.log('Admin user already exists!');
-      console.log('Email: admin@realestate.com');
+      console.log('Email: shop43856@gmail.com');
       console.log('Password: admin123');
       process.exit(0);
     }
@@ -20,7 +20,7 @@ const createAdminUser = async () => {
     // Create admin user
     const adminUser = new User({
       username: 'admin',
-      email: 'admin@realestate.com',
+      email: 'shop43856@gmail.com',
       password: 'admin123',
       role: 'admin'
     });
@@ -28,7 +28,7 @@ const createAdminUser = async () => {
     await adminUser.save();
 
     console.log('Admin user created successfully!');
-    console.log('Email: admin@realestate.com');
+    console.log('Email: shop43856@gmail.com');
     console.log('Password: admin123');
 
     process.exit(0);
