@@ -1,127 +1,67 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
-
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+// Connect DB
 connectDB();
 
-// Middleware - COMPLETE CORS FIX
+// GLOBAL CORS
+const allowedOrigins = [
+  "https://real-estate-ten-ruby-83.vercel.app",
+  "https://real-estate.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://real-estate-q6r2.onrender.com"
+];
+
 app.use(cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
+  origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }));
 
-// Allow OPTIONS preflight for all routes
-app.options('*', cors());
+app.options("*", cors());
 
-// Body parser
+// Parsers
 app.use(express.json());
-
-// Cookie parser
-const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
-// Admin login route (direct access) - MOVED BEFORE OTHER ROUTES
+// CONTROLLERS
 const { login, sendOTP, verifyOTP } = require('./controllers/authController');
-app.post('/api/admin/login', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
-  methods: ["POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200
-}), login);
 
-app.post('/api/admin/send-otp', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
-  methods: ["POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200
-}), sendOTP);
+// ADMIN AUTH ROUTES (NO BUG NOW)
+const adminAuthRoute = require('./routes/adminAuthRoute');
 
-app.post('/api/admin/verify-otp', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
-  methods: ["POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200
-}), verifyOTP);
+// DIRECT AUTH ENDPOINTS
+app.post('/api/admin/login', login);
+app.post('/api/admin/send-otp', sendOTP);
+app.post('/api/admin/verify-otp', verifyOTP);
 
-// Root route
-app.get('/', (req, res) => {
-  res.json({ message: 'Real Estate API is running!' });
-});
-
-// Routes
+// ROUTES
 const authRoutes = require('./routes/auth');
 const propertyRoutes = require('./routes/propertyRoutes');
 const agentRoutes = require('./routes/agentRoutes');
 const testimonialRoutes = require('./routes/testimonials');
 const contactRoutes = require('./routes/contactRoutes');
-const adminAuthRoute = require('../routes/adminAuthRoute');
 
-// API Routes with explicit CORS
-app.use('/api/auth', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200
-}), authRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/properties', propertyRoutes);
+app.use('/api/agents', agentRoutes);
+app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/contacts', contactRoutes);
+app.use('/api/admin-auth', adminAuthRoute);
 
-app.use('/api/properties', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200
-}), propertyRoutes);
-
-app.use('/api/agents', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200
-}), agentRoutes);
-
-app.use('/api/testimonials', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200
-}), testimonialRoutes);
-
-app.use('/api/contacts', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200
-}), contactRoutes);
-
-app.use('/api/admin-auth', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
-  optionsSuccessStatus: 200
-}), adminAuthRoute);
-
-// Health check
+// HEALTH CHECK
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Backend is running' });
+  res.json({ status: "OK", message: "Backend Running" });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
