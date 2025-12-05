@@ -36,7 +36,7 @@ app.use(cookieParser());
 const { login, sendOTP, verifyOTP } = require('./controllers/authController');
 
 // ADMIN AUTH ROUTES (NO BUG NOW)
-const adminAuthRoute = require('./routes/adminAuthRoute');
+const adminAuthRoute = require('../routes/adminAuthRoute');
 
 // DIRECT AUTH ENDPOINTS
 app.post('/api/admin/login', login);
