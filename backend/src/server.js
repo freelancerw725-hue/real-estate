@@ -12,7 +12,7 @@ connectDB();
 
 // Middleware - COMPLETE CORS FIX
 app.use(cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "https://real-estate-q6r2.onrender.com"],
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
@@ -30,14 +30,30 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 // Admin login route (direct access) - MOVED BEFORE OTHER ROUTES
-const { login } = require('./controllers/authController');
+const { login, sendOTP, verifyOTP } = require('./controllers/authController');
 app.post('/api/admin/login', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "https://real-estate-q6r2.onrender.com"],
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
   methods: ["POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
   optionsSuccessStatus: 200
 }), login);
+
+app.post('/api/admin/send-otp', cors({
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
+  methods: ["POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  credentials: true,
+  optionsSuccessStatus: 200
+}), sendOTP);
+
+app.post('/api/admin/verify-otp', cors({
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
+  methods: ["POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  credentials: true,
+  optionsSuccessStatus: 200
+}), verifyOTP);
 
 // Root route
 app.get('/', (req, res) => {
@@ -50,10 +66,11 @@ const propertyRoutes = require('./routes/propertyRoutes');
 const agentRoutes = require('./routes/agentRoutes');
 const testimonialRoutes = require('./routes/testimonials');
 const contactRoutes = require('./routes/contactRoutes');
+const adminAuthRoute = require('../routes/adminAuthRoute');
 
 // API Routes with explicit CORS
 app.use('/api/auth', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "https://real-estate-q6r2.onrender.com"],
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
@@ -61,7 +78,7 @@ app.use('/api/auth', cors({
 }), authRoutes);
 
 app.use('/api/properties', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "https://real-estate-q6r2.onrender.com"],
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
@@ -69,7 +86,7 @@ app.use('/api/properties', cors({
 }), propertyRoutes);
 
 app.use('/api/agents', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "https://real-estate-q6r2.onrender.com"],
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
@@ -77,7 +94,7 @@ app.use('/api/agents', cors({
 }), agentRoutes);
 
 app.use('/api/testimonials', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "https://real-estate-q6r2.onrender.com"],
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
@@ -85,12 +102,20 @@ app.use('/api/testimonials', cors({
 }), testimonialRoutes);
 
 app.use('/api/contacts', cors({
-  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "https://real-estate-q6r2.onrender.com"],
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
   optionsSuccessStatus: 200
 }), contactRoutes);
+
+app.use('/api/admin-auth', cors({
+  origin: ["https://real-estate-ten-ruby-83.vercel.app", "https://real-estate.vercel.app", "http://localhost:3000", "http://localhost:5173", "https://real-estate-q6r2.onrender.com"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  credentials: true,
+  optionsSuccessStatus: 200
+}), adminAuthRoute);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,162 +1,75 @@
-const User = require('../../models/User');   // ✅ FIXED PATH
-const Admin = require('../../models/Admin');   // ✅ FIXED PATH
+// const Admin = require('../models/Admin');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 
-// Generate JWT token
-const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: '7d'
-  });
-};
-
-// Register new user
-const register = async (req, res) => {
-  try {
-    const { username, email, password, role } = req.body;
-
-    // Check if user already exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        message: 'User with this email or username already exists'
-      });
-    }
-
-    // Create new user
-    const user = new User({
-      username,
-      email,
-      password,
-      role: role || 'admin' // default admin
-    });
-
-    await user.save();
-
-    // Generate token
-    const token = generateToken(user._id);
-
-    res.status(201).json({
-      message: 'User registered successfully',
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role
-      },
-      token
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// Login user or admin
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // First try to find user in Admin model
-    let account = await Admin.findOne({ email });
-    let isAdmin = true;
-
-    if (!account) {
-      // If not found in Admin, try User model
-      account = await User.findOne({ email });
-      isAdmin = false;
+    if (email !== 'freelancerw725@gmail.com') {
+      return res.status(400).json({ message: 'Invalid admin email' });
     }
 
-    if (!account) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(400).json({ message: 'Admin not found' });
     }
 
-    // Check password
-    let isPasswordValid;
-    if (isAdmin) {
-      // For Admin model, use bcrypt directly since it doesn't have comparePassword method
-      const bcrypt = require('bcryptjs');
-      isPasswordValid = await bcrypt.compare(password, account.password);
-    } else {
-      // For User model, use the comparePassword method
-      isPasswordValid = await account.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+    const token = jwt.sign({ id: admin._id, email: admin.email }, process.env.JWT_SECRET, {
+      expiresIn: '24h'
+    });
 
-    // Generate token
-    const token = generateToken(account._id);
+    res.cookie('adminToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
 
-    res.json({
+    return res.status(200).json({
       message: 'Login successful',
-      user: {
-        id: account._id,
-        email: account.email,
-        role: isAdmin ? 'admin' : account.role,
-        type: isAdmin ? 'admin' : 'user'
-      },
-      token
+      token,
+      admin: { id: admin._id, email: admin.email }
     });
 
   } catch (error) {
-    res.status(500).json({
+    console.error('Login error:', error);
+    return res.status(500).json({
       message: 'Server error',
       error: error.message
     });
   }
 };
 
-// Get profile (protected)
-const getProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId).select('-password');
-    res.json({ user });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// Send OTP to admin email
 const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check if email is the admin email
-    if (email !== 'shop43856@gmail.com') {
+    if (email !== 'freelancerw725@gmail.com') {
       return res.status(400).json({ message: 'Invalid admin email' });
     }
 
-    // Find or create admin
     let admin = await Admin.findOne({ email });
     if (!admin) {
       admin = new Admin({
         email,
-        password: 'defaultpassword' // This will be hashed by pre-save hook
+        password: 'defaultpassword'
       });
       await admin.save();
     }
 
-    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Set OTP and expiration (10 minutes)
     admin.otp = otp;
     admin.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
     await admin.save();
 
-    // Send OTP via email
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -165,85 +78,130 @@ const sendOTP = async (req, res) => {
       }
     });
 
-    const mailOptions = {
+    await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Admin Login OTP',
       text: `Your OTP for admin login is: ${otp}. This OTP will expire in 10 minutes.`
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-
-    res.json({ message: 'OTP sent successfully' });
+    // ⭐ VERY IMPORTANT: Use return
+    return res.status(200).json({ message: 'OTP sent successfully' });
 
   } catch (error) {
     console.error('Send OTP error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       message: 'Server error',
       error: error.message
     });
   }
 };
 
-// Verify OTP and login
 const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    // Find admin
+    if (email !== 'freelancerw725@gmail.com') {
+      return res.status(400).json({ message: 'Invalid admin email' });
+    }
+
     const admin = await Admin.findOne({ email });
     if (!admin) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Admin not found' });
     }
 
-    // Check OTP
-    if (!admin.otp || admin.otp !== otp) {
-      return res.status(401).json({ message: 'Invalid OTP' });
+    if (admin.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
     }
 
-    // Check expiration
     if (admin.otpExpires < new Date()) {
-      return res.status(401).json({ message: 'OTP expired' });
+      return res.status(400).json({ message: 'OTP expired' });
     }
 
-    // Clear OTP
+    // Clear OTP after successful verification
     admin.otp = undefined;
     admin.otpExpires = undefined;
     await admin.save();
 
-    // Generate token
-    const token = generateToken(admin._id);
+    const token = jwt.sign({ id: admin._id, email: admin.email }, process.env.JWT_SECRET, {
+      expiresIn: '24h'
+    });
 
-    // Set httpOnly cookie
     res.cookie('adminToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
-    res.json({
-      message: 'Login successful',
+    return res.status(200).json({
+      message: 'OTP verified successfully',
       token,
-      user: {
-        id: admin._id,
-        email: admin.email,
-        role: 'admin'
-      }
+      admin: { id: admin._id, email: admin.email }
     });
 
   } catch (error) {
     console.error('Verify OTP error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       message: 'Server error',
       error: error.message
     });
   }
 };
 
-module.exports = {
-  register,
-  login,
-  sendOTP,
-  verifyOTP,
-  getProfile
+const register = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const existingUser = await Admin.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new Admin({
+      email,
+      password: hashedPassword
+    });
+
+    await user.save();
+
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
+      expiresIn: '24h'
+    });
+
+    return res.status(201).json({
+      message: 'User registered successfully',
+      token,
+      user: { id: user._id, email: user.email }
+    });
+
+  } catch (error) {
+    console.error('Register error:', error);
+    return res.status(500).json({
+      message: 'Server error',
+      error: error.message
+    });
+  }
 };
+
+const getProfile = async (req, res) => {
+  try {
+    const user = await Admin.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({ user });
+
+  } catch (error) {
+    console.error('Get profile error:', error);
+    return res.status(500).json({
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+module.exports = { login, sendOTP, verifyOTP, register, getProfile };

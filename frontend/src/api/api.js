@@ -1,5 +1,5 @@
 // 🔥 LOCAL BACKEND BASE URL (for development)
-const API_BASE_URL = 'https://real-estate-q6r2.onrender.com/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export const api = {
   // Properties
@@ -203,7 +203,7 @@ export const api = {
 
   // Send OTP for admin login
   sendOTP: async (data) => {
-    const response = await fetch(`${API_BASE_URL}/auth/admin/send-otp`, {
+    const response = await fetch(`${API_BASE_URL}/admin-auth/send-otp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -215,7 +215,7 @@ export const api = {
 
   // Verify OTP for admin login
   verifyOTP: async (data) => {
-    const response = await fetch(`${API_BASE_URL}/auth/admin/verify-otp`, {
+    const response = await fetch(`${API_BASE_URL}/admin-auth/verify-otp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
