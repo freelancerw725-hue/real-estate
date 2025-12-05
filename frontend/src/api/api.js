@@ -1,5 +1,5 @@
-// 🔥 LOCAL BACKEND BASE URL (for development)
-const API_BASE_URL = 'http://localhost:5000/api';
+// 🔥 PRODUCTION BACKEND BASE URL (Render)
+const API_BASE_URL = 'https://real-estate-6f2o.onrender.com/api';
 
 export const api = {
   // Properties
