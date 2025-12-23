@@ -10,7 +10,7 @@ connectDB();
 
 /* 🔥 CORS – MUST BE FIRST */
 app.use(cors({
-  origin: true,
+  origin: ["http://localhost:5173", "https://real-estate-6f2o.onrender.com"],
   credentials: true
 }));
 
@@ -24,7 +24,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5001;
 app.listen(PORT, () =>
   console.log("🚀 Server running on port", PORT)
 );

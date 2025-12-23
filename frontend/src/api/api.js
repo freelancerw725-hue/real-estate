@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://real-estate-6f2o.onrender.com/api';
+const API_BASE_URL = 'http://localhost:5001/api';
 
 export const api = {
 
