@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 import { api } from "../api/api";
 
 const AgentsSection = () => {
@@ -19,8 +18,8 @@ const AgentsSection = () => {
         }
       } catch (err) {
         console.error('Error fetching agents:', err);
-        setAgents(demoAgents);
-        setError('Failed to load agents from backend, showing demo data');
+        setAgents([]);
+        setError('Failed to load agents from backend');
       } finally {
         setLoading(false);
       }
@@ -79,10 +78,10 @@ const AgentsSection = () => {
               <p className="text-sm text-gray-500">{agent.experience} years experience</p>
 
               {/* Social Icons */}
-              <div className="flex justify-center gap-4 text-xl mt-4">
-                <FaFacebook className="hover:text-blue-600 cursor-pointer" />
-                <FaInstagram className="hover:text-pink-500 cursor-pointer" />
-                <FaTwitter className="hover:text-blue-400 cursor-pointer" />
+              <div className="flex justify-center gap-4 text-sm mt-4">
+                <span className="hover:text-blue-600 cursor-pointer">Facebook</span>
+                <span className="hover:text-pink-500 cursor-pointer">Instagram</span>
+                <span className="hover:text-blue-400 cursor-pointer">Twitter</span>
               </div>
             </div>
           ))}

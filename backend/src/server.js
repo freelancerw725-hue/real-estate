@@ -17,7 +17,8 @@ connectDB();
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://real-estate-ten-ruby-83.vercel.app"
+    "https://real-estate-ten-ruby-83.vercel.app",
+    process.env.FRONTEND_URL || "*"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
