@@ -3,3 +3,6 @@
 - [x] Add GET /stats route in adminAuthRoute.js
 - [x] Change contact route mount to /api/contacts in server.js
 - [x] Update authenticateToken middleware to support admin tokens (check for role: admin in token)
+- [x] Fix production errors: Update vercel.json to exclude /api from rewrites
+- [x] Fix API imports in AgentsSection.jsx and PropertyDetails.jsx to use named import
+- [x] Update backend CORS to allow current frontend domain
