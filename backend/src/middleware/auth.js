@@ -11,6 +11,14 @@ const authenticateToken = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if it's an admin token
+    if (decoded.role === 'admin') {
+      req.user = { email: decoded.email, role: 'admin' };
+      return next();
+    }
+
+    // For regular users
     const user = await User.findById(decoded.userId);
 
     if (!user) {

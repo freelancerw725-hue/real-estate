@@ -18,8 +18,9 @@ const agentSchema = new mongoose.Schema({
     required: true
   },
   image: {
-    type: String,
-    required: true
+  type: String,
+  required: true,
+  match: /\.(jpg|jpeg|png|webp)$/i
   },
   experience: {
     type: Number,

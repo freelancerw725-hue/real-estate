@@ -1,42 +1,222 @@
-const API_BASE_URL = 'http://localhost:5001/api';
+// ✅ AUTO BASE URL (Local + Production)
+const API_BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000/api"
+    : "https://real-estate-6f2o.onrender.com/api";
 
 export const api = {
+  /* ================================
+     🔐 ADMIN OTP AUTH
+  ================================= */
 
-  // 🔐 ADMIN OTP LOGIN
-  sendOTP: async (data) => {
+  sendOTP: async ({ email }) => {
     const res = await fetch(`${API_BASE_URL}/admin/send-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
     });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to send OTP");
+    }
+
     return res.json();
   },
 
-  verifyOTP: async (data) => {
+  verifyOTP: async ({ email, otp }) => {
     const res = await fetch(`${API_BASE_URL}/admin/verify-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, otp }),
     });
-    return res.json();
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "OTP verification failed");
+    }
+
+    const data = await res.json();
+
+    if (data.token) {
+      localStorage.setItem("adminToken", data.token);
+    }
+
+    return data;
   },
 
-  // 🏠 PROPERTIES
+  /* ================================
+     🏠 PROPERTIES
+  ================================= */
+
   getProperties: async () => {
     const res = await fetch(`${API_BASE_URL}/properties`);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch properties");
+    }
+
     return res.json();
   },
 
-  createProperty: async (data) => {
-    const token = localStorage.getItem('adminToken');
+  createProperty: async (propertyData) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
     const res = await fetch(`${API_BASE_URL}/properties`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(propertyData),
     });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to create property");
+    }
+
     return res.json();
-  }
+  },
+
+  /* ================================
+     👤 AGENTS
+  ================================= */
+
+  createAgent: async (agentData) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/agents`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        ...agentData,
+        experience: Number(agentData.experience),
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Error saving agent");
+    }
+
+    return res.json();
+  },
+
+  getAgents: async () => {
+    const res = await fetch(`${API_BASE_URL}/agents`);
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to fetch agents");
+    }
+
+    return res.json();
+  },
+
+  updateAgent: async (id, agentData) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/agents/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        ...agentData,
+        experience: Number(agentData.experience),
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to update agent");
+    }
+
+    return res.json();
+  },
+
+  deleteAgent: async (id) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/agents/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to delete agent");
+    }
+
+    return res.json();
+  },
+
+  /* ================================
+     📩 CONTACTS
+  ================================= */
+
+  getContacts: async () => {
+    const token = localStorage.getItem("adminToken");
+
+    const res = await fetch(`${API_BASE_URL}/contacts`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to fetch contacts");
+    }
+
+    return res.json();
+  },
+
+  /* ================================
+     📊 DASHBOARD
+  ================================= */
+
+  getDashboardStats: async () => {
+    const token = localStorage.getItem("adminToken");
+
+    const res = await fetch(`${API_BASE_URL}/admin/stats`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to fetch dashboard stats");
+    }
+
+    return res.json();
+  },
 };

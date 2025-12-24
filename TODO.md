@@ -1,4 +1,5 @@
-# CORS Fix Plan
-
-- [ ] Update backend/src/server.js to add "http://localhost:5173" to all CORS origins arrays
-- [ ] Test the fix by running the frontend and checking if CORS error is resolved
+- [x] Change server port to 5000 in server.js
+- [x] Add getStats function in adminAuthController.js to fetch counts of properties, agents, contacts
+- [x] Add GET /stats route in adminAuthRoute.js
+- [x] Change contact route mount to /api/contacts in server.js
+- [x] Update authenticateToken middleware to support admin tokens (check for role: admin in token)
