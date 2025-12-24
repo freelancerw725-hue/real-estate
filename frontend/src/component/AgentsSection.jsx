@@ -64,7 +64,7 @@ const AgentsSection = () => {
         <div className="grid md:grid-cols-3 gap-10">
           {agents.map((agent) => (
             <div
-              key={agent.id}
+              key={agent._id}
               className="bg-gray-100 p-6 rounded-xl shadow hover:shadow-xl transition"
             >
               <img

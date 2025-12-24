@@ -1,6 +1,6 @@
-      import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
   import { useParams } from 'react-router-dom';
-  import api from '../api/api';
+  import { api } from '../api/api';
   import { Card, CardContent } from './ui/card';
 
   const PropertyDetails = () => {

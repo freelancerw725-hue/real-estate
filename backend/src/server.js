@@ -18,10 +18,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     "https://real-estate-ten-ruby-83.vercel.app",
-<<<<<<< HEAD
     "https://real-estate-f8h6rq048-freelancerw725-hues-projects.vercel.app",
-=======
->>>>>>> ee49081c816b6648ea51b8f29e8907ba3715ebfd
     process.env.FRONTEND_URL || "*"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
