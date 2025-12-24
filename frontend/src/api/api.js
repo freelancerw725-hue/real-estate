@@ -63,6 +63,16 @@ export const api = {
     return res.json();
   },
 
+  getProperty: async (id) => {
+    const res = await fetch(`${API_BASE_URL}/properties/${id}`);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch property");
+    }
+
+    return res.json();
+  },
+
   createProperty: async (propertyData) => {
     const token = localStorage.getItem("adminToken");
 
