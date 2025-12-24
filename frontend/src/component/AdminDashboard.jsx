@@ -323,6 +323,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleContactDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this message?')) {
+      try {
+        await api.deleteContact(id);
+        fetchContacts();
+      } catch (error) {
+        console.error('Error deleting contact:', error);
+        alert('Error deleting message. Please try again.');
+      }
+    }
+  };
+
   const cancelTestimonialEdit = () => {
     setShowTestimonialForm(false);
     setEditingTestimonial(null);
@@ -578,19 +590,19 @@ export default function AdminDashboard() {
         <>
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <DashboardCard icon={<HomeIcon className="h-6 w-6" />} title="Total Properties" value={stats.totalProperties.toString()} />
-            <DashboardCard icon={<UsersIcon className="h-6 w-6" />} title="Total Agents" value={stats.totalAgents.toString()} />
+            <DashboardCard icon={<HomeIcon className="h-6 w-6" />} title="Total Properties" value={(stats?.totalProperties ?? 0).toString()} />
+            <DashboardCard icon={<UsersIcon className="h-6 w-6" />} title="Total Agents" value={(stats?.totalAgents ?? 0).toString()} />
             <DashboardCard
               icon={<EnvelopeIcon className="h-6 w-6" />}
               title="New Messages"
-              value={stats.totalContacts.toString()}
+              value={(stats?.totalContacts ?? 0).toString()}
               onClick={() => setActiveTab('messages')}
               clickable
             />
             <DashboardCard
               icon={<StarIcon className="h-6 w-6" />}
               title="Reviews"
-              value={stats.totalTestimonials.toString()}
+              value={(stats?.totalTestimonials ?? 0).toString()}
               onClick={() => setActiveTab('reviews')}
               clickable
             />
@@ -848,13 +860,24 @@ export default function AdminDashboard() {
               contacts.map((contact) => (
                 <Card key={contact._id} className="rounded-2xl shadow-md border border-gray-200">
                   <CardContent className="p-4">
-                    <div>
-                      <h3 className="font-semibold text-lg">{contact.name}</h3>
-                      <p className="text-gray-600">{contact.email}</p>
-                      <p className="text-gray-600 text-sm mt-2">{contact.message}</p>
-                      <p className="text-gray-400 text-xs mt-1">
-                        {new Date(contact.createdAt).toLocaleDateString()}
-                      </p>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg">{contact.name}</h3>
+                        <p className="text-gray-600">{contact.email}</p>
+                        <p className="text-gray-600 text-sm mt-2">{contact.message}</p>
+                        <p className="text-gray-400 text-xs mt-1">
+                          {new Date(contact.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => handleContactDelete(contact._id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                          title="Delete message"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

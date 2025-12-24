@@ -87,6 +87,52 @@ export const api = {
     return res.json();
   },
 
+  updateProperty: async (id, propertyData) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/properties/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(propertyData),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to update property");
+    }
+
+    return res.json();
+  },
+
+  deleteProperty: async (id) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/properties/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to delete property");
+    }
+
+    return res.json();
+  },
+
   /* ================================
      👤 AGENTS
   ================================= */
@@ -182,6 +228,23 @@ export const api = {
      📩 CONTACTS
   ================================= */
 
+  createContact: async (contactData) => {
+    const res = await fetch(`${API_BASE_URL}/contacts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(contactData),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to submit contact");
+    }
+
+    return res.json();
+  },
+
   getContacts: async () => {
     const token = localStorage.getItem("adminToken");
 
@@ -194,6 +257,28 @@ export const api = {
     if (!res.ok) {
       const text = await res.text();
       throw new Error(text || "Failed to fetch contacts");
+    }
+
+    return res.json();
+  },
+
+  deleteContact: async (id) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/contacts/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to delete contact");
     }
 
     return res.json();
@@ -215,6 +300,90 @@ export const api = {
     if (!res.ok) {
       const text = await res.text();
       throw new Error(text || "Failed to fetch dashboard stats");
+    }
+
+    return res.json();
+  },
+
+  /* ================================
+     💬 TESTIMONIALS
+  ================================= */
+
+  getTestimonials: async () => {
+    const res = await fetch(`${API_BASE_URL}/testimonials`);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch testimonials");
+    }
+
+    return res.json();
+  },
+
+  createTestimonial: async (testimonialData) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/testimonials`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(testimonialData),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to create testimonial");
+    }
+
+    return res.json();
+  },
+
+  updateTestimonial: async (id, testimonialData) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/testimonials/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(testimonialData),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to update testimonial");
+    }
+
+    return res.json();
+  },
+
+  deleteTestimonial: async (id) => {
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      throw new Error("Admin not authenticated");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/testimonials/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to delete testimonial");
     }
 
     return res.json();
